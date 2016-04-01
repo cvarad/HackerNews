@@ -1,5 +1,7 @@
-package com.varadr.hackernews.topstories;
+package com.varadr.hackernews.storieslist;
 
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -7,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -16,6 +19,7 @@ import com.firebase.client.ValueEventListener;
 import com.varadr.hackernews.Constants;
 import com.varadr.hackernews.R;
 import com.varadr.hackernews.model.Story;
+import com.varadr.hackernews.storydetails.StoryDetailsActivity;
 import com.varadr.hackernews.utils.Utils;
 
 import java.util.ArrayList;
@@ -24,6 +28,8 @@ import java.util.ArrayList;
  * Created by varad on 31/3/16.
  */
 public class StoriesRecyclerAdapter extends RecyclerView.Adapter<StoriesRecyclerAdapter.ViewHolder> {
+    private static final String TAG = "StoriesRecyclerAdapter";
+
     private ArrayList<Story> mStories;
     private Query mRef;
     private ChildEventListener mChildEventListener;
@@ -31,7 +37,7 @@ public class StoriesRecyclerAdapter extends RecyclerView.Adapter<StoriesRecycler
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView textViewStoryTitle;
         private TextView textViewStoryDomain;
-        private TextView textViewStoryPoints;
+        private TextView textViewStoryScore;
         private View mView;
         private Story mStory;
 
@@ -41,19 +47,31 @@ public class StoriesRecyclerAdapter extends RecyclerView.Adapter<StoriesRecycler
             mView.setOnClickListener(this);
             textViewStoryTitle = (TextView) v.findViewById(R.id.text_view_story_title);
             textViewStoryDomain = (TextView) v.findViewById(R.id.text_view_story_domain);
-            textViewStoryPoints = (TextView) v.findViewById(R.id.text_view_story_points);
+            textViewStoryScore = (TextView) v.findViewById(R.id.text_view_story_points);
         }
 
         public void bindStory(Story story) {
             this.mStory = story;
             this.textViewStoryTitle.setText(story.getTitle());
-            this.textViewStoryDomain.setText(Utils.getDomain(story.getUrl()));
-            this.textViewStoryPoints.setText(String.valueOf(story.getScore()) + " points");
+            try {
+                this.textViewStoryDomain.setText(Utils.getDomain(story.getUrl()));
+            } catch (Exception e) {
+                Log.e(TAG, e.getMessage() + "\n" + mStory.getId());
+            }
+
+            this.textViewStoryScore.setText(String.valueOf(story.getScore()) + " points");
         }
 
         @Override
         public void onClick(View v) {
-            Log.d("StoriesRecyclerAdapter", mStory.getTitle());
+            Context context = v.getContext();
+            Intent i;
+            try {
+                i = StoryDetailsActivity.newIntent(context, mStory);
+                context.startActivity(i);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
         }
     }
 

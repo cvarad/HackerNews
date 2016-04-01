@@ -1,4 +1,4 @@
-package com.varadr.hackernews.newstories;
+package com.varadr.hackernews.storieslist;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,23 +11,36 @@ import android.view.ViewGroup;
 import com.firebase.client.Firebase;
 import com.varadr.hackernews.Constants;
 import com.varadr.hackernews.R;
-import com.varadr.hackernews.topstories.StoriesRecyclerAdapter;
 
 /**
- * Created by varad on 1/4/16.
+ * A simple {@link Fragment} subclass.
+ * Use the {@link StoriesListFragment#newInstance} factory method to
+ * create an instance of this fragment.
  */
-public class NewStoriesFragment extends Fragment {
+public class StoriesListFragment extends Fragment {
+
+    private static final String KEY_STORIES_URL = "key_stories_list_stories_url";
+
+    private String mUrl;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private StoriesRecyclerAdapter mAdapter;
 
-    public NewStoriesFragment() {
+    public StoriesListFragment() {
         // Required empty public constructor
     }
 
-    public static NewStoriesFragment newInstance() {
-        NewStoriesFragment fragment = new NewStoriesFragment();
+    /**
+     * Use this factory method to create a new instance of
+     * this fragment using the provided parameters.
+     *
+     * @return A new instance of fragment TopStoriesFragment.
+     */
+    public static StoriesListFragment newInstance(String url) {
+        StoriesListFragment fragment = new StoriesListFragment();
+
         Bundle args = new Bundle();
+        args.putString(KEY_STORIES_URL, url);
         fragment.setArguments(args);
         return fragment;
     }
@@ -36,6 +49,7 @@ public class NewStoriesFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
+            mUrl = getArguments().getString(KEY_STORIES_URL);
         }
     }
 
@@ -51,7 +65,7 @@ public class NewStoriesFragment extends Fragment {
         /**
          * Create Firebase reference
          */
-        Firebase newStoriesRef = new Firebase(Constants.URL_NEW_STORIES);
+        Firebase topStoriesRef = new Firebase(mUrl);
 
 
         /**
@@ -60,9 +74,8 @@ public class NewStoriesFragment extends Fragment {
          * Finally, set the created adapter to the mListView
          */
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new StoriesRecyclerAdapter(newStoriesRef, 30);
+        mAdapter = new StoriesRecyclerAdapter(topStoriesRef, 30);
         mRecyclerView.setAdapter(mAdapter);
-
         return rootView;
     }
 
